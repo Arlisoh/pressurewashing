@@ -1,0 +1,59 @@
+EASIEST SETUP FOR THE PRESSURE WASHING AI SITE
+
+WHAT I FIXED
+- The site now accepts CLAUDE_API_KEY or ANTHROPIC_API_KEY.
+- It trims accidental spaces, line breaks, quotes, and pasted NAME=value formats.
+- It detects the common mistake where a masked key like sk-ant-api03-abc...xyz was pasted.
+- It gives safer, clearer errors without revealing your full key.
+- It explicitly configures fal with FAL_KEY inside the server function.
+- It includes a safe setup checker.
+
+NETLIFY ENVIRONMENT VARIABLES TO ADD
+Go to Netlify > Site configuration > Environment variables.
+
+Add these:
+
+CLAUDE_API_KEY
+Value: paste the FULL key from Claude Console. It should start with sk-ant-. Do not paste the shortened preview with ... in it.
+
+FAL_KEY
+Value: paste your full fal.ai API key.
+
+SITE_URL
+Value: https://serene-kitsune-a5248d.netlify.app
+
+ADMIN_GENERATE_SECRET
+Value: choose a private password-like secret. Example: pw-admin-7fX93qQpL29sV8mT2026
+
+BUSINESS_NAME
+Value: Clean Home Services
+
+BUSINESS_PHONE
+Value: your real phone number
+
+BUSINESS_EMAIL
+Value: your real email
+
+IMPORTANT
+If Netlify shows scopes, choose Functions and Builds.
+After saving variables, go to Deploys > Trigger deploy > Deploy site.
+
+SAFE SETUP CHECK URL
+After deploy, visit this, replacing YOUR_SECRET:
+https://serene-kitsune-a5248d.netlify.app/.netlify/functions/check-setup?secret=YOUR_SECRET
+
+That page will NOT show your full keys. It will only say whether Netlify sees them.
+
+MANUAL GENERATE URL
+After the setup check looks good, visit this, replacing YOUR_SECRET:
+https://serene-kitsune-a5248d.netlify.app/.netlify/functions/admin-generate?secret=YOUR_SECRET
+
+HOW TO UPLOAD THIS FIX
+Best option: upload the whole fixed project folder to GitHub from a desktop computer using GitHub Desktop.
+
+Simpler single-file option:
+If you only want the Claude key fix, replace this file in GitHub:
+src/lib/claude.mjs
+with the claude.mjs file included in the separate single-file download I gave you.
+
+But the full fixed ZIP is better because it also includes fal setup improvements and the check-setup function.

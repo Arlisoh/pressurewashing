@@ -1,5 +1,6 @@
 import { fal } from '@fal-ai/client';
 import { DEFAULT_IMAGE_MODEL } from './config.mjs';
+import { readFalKey } from './secrets.mjs';
 
 function pickImageUrl(result) {
   const data = result?.data || result;
@@ -12,9 +13,8 @@ function pickImageUrl(result) {
 }
 
 export async function generateAndDownloadImage(prompt) {
-  if (!process.env.FAL_KEY) {
-    throw new Error('Missing FAL_KEY. Add it in Netlify environment variables with Functions scope.');
-  }
+  const falKey = readFalKey();
+  fal.config({ credentials: falKey.value });
 
   const model = process.env.FAL_IMAGE_MODEL || DEFAULT_IMAGE_MODEL;
   const result = await fal.subscribe(model, {

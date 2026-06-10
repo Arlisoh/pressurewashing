@@ -1,5 +1,6 @@
 import { DEFAULT_CLAUDE_MODEL, getBusiness } from './config.mjs';
 import { cleanSentence, slugify, truncate } from './text.mjs';
+import { readClaudeApiKey } from './secrets.mjs';
 
 function extractJson(text) {
   const trimmed = String(text || '').trim();
@@ -51,10 +52,8 @@ function normalizeArticle(raw, target) {
 }
 
 export async function generateArticleWithClaude(target, existingPosts = []) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing ANTHROPIC_API_KEY. Add it in Netlify environment variables with Functions scope.');
-  }
+  const claudeKey = readClaudeApiKey();
+  const apiKey = claudeKey.value;
 
   const business = getBusiness();
   const recentTitles = existingPosts.slice(0, 20).map((post) => `- ${post.title}`).join('\n');
@@ -122,7 +121,11 @@ Requirements:
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Claude API error ${response.status}: ${errorText.slice(0, 600)}`);
+    const safeKeyInfo = `${claudeKey.name}, length ${claudeKey.summary.length}, starts ${claudeKey.summary.startsWith}, ends ${claudeKey.summary.endsWith}`;
+    if (response.status === 401) {
+      throw new Error(`Claude API 401 invalid key. Netlify is sending a key from ${safeKeyInfo}. Create a brand new Claude API key, paste the full sk-ant... value into Netlify as CLAUDE_API_KEY, save, then Trigger deploy. Anthropic response: ${errorText.slice(0, 500)}`);
+    }
+    throw new Error(`Claude API error ${response.status}. Key source: ${safeKeyInfo}. Response: ${errorText.slice(0, 600)}`);
   }
 
   const data = await response.json();

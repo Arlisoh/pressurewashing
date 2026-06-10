@@ -57,3 +57,17 @@ src/lib/claude.mjs
 with the claude.mjs file included in the separate single-file download I gave you.
 
 But the full fixed ZIP is better because it also includes fal setup improvements and the check-setup function.
+
+JUNE 10 BACKGROUND FIX
+----------------------
+If /.netlify/functions/admin-generate gave a browser HTTP 502, upload this version.
+The admin-generate URL now queues the generator in a background function so the browser
+gets a fast 202 response instead of timing out while Claude and fal run.
+
+Use this URL to start generation:
+https://YOUR-SITE.netlify.app/.netlify/functions/admin-generate?secret=YOUR_ADMIN_SECRET
+
+Then check latest status here:
+https://YOUR-SITE.netlify.app/.netlify/functions/generation-status?secret=YOUR_ADMIN_SECRET
+
+Wait 1 to 3 minutes and refresh the homepage.

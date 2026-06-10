@@ -45,7 +45,7 @@ export async function savePost(post) {
 
 export async function saveImage(slug, imageArrayBuffer, contentType = 'image/png') {
   const store = imagesStore();
-  const extension = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
+  const extension = contentType.includes('svg') ? 'svg' : (contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png');
   const key = `${slug}.${extension}`;
   await store.set(key, imageArrayBuffer, {
     metadata: {

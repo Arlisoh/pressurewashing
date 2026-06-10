@@ -143,11 +143,12 @@ export function renderPost(post, related = []) {
   });
 }
 
-export function renderNotFound() {
+export function renderNotFound(slug = '') {
+  const attempted = slug ? `<p class="meta">Requested slug: ${escapeHtml(slug)}</p>` : '';
   return layout({
     title: 'Article not found',
     description: 'This pressure washing article could not be found.',
     robots: 'noindex,follow',
-    body: `<main class="wrap hero"><div class="empty"><h1>Article not found</h1><p>The requested article is not available yet.</p><p><a class="btn" href="/">Back to latest articles</a></p></div></main>`
+    body: `<main class="wrap hero"><div class="empty"><h1>Article not found</h1><p>The homepage can load before an article detail route cache catches up. Refresh once, or go back to the homepage and open the article again.</p>${attempted}<p><a class="btn" href="/">Back to latest articles</a></p></div></main>`
   });
 }

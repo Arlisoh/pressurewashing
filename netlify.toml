@@ -15,13 +15,13 @@
   status = 200
 
 [[redirects]]
-  from = "/pressure-washing/:slug"
-  to = "/.netlify/functions/post?slug=:slug"
+  from = "/pressure-washing/*"
+  to = "/.netlify/functions/post?slug=:splat"
   status = 200
 
 [[redirects]]
-  from = "/blog/:slug"
-  to = "/.netlify/functions/post?slug=:slug"
+  from = "/blog/*"
+  to = "/.netlify/functions/post?slug=:splat"
   status = 200
 
 [[redirects]]

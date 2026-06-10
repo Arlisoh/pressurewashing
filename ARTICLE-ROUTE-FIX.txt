@@ -1,0 +1,9 @@
+Article route fix
+
+This version fixes article-click issues by making the post function more tolerant of Netlify rewrite behavior and adding an admin-only article-debug function.
+
+After deploy, test:
+https://YOUR-SITE.netlify.app/.netlify/functions/article-debug?secret=YOUR_ADMIN_SECRET
+
+If fullPostFound is true, the article exists and the route is the issue.
+If fullPostFound is false, the article summary exists but the full article did not save, so generate a new one after this deploy.

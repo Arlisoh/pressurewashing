@@ -1,0 +1,45 @@
+[build]
+  command = "npm run build"
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions."generate-post"]
+  schedule = "@hourly"
+
+[[redirects]]
+  from = "/"
+  to = "/.netlify/functions/home"
+  status = 200
+
+[[redirects]]
+  from = "/pressure-washing/:slug"
+  to = "/.netlify/functions/post?slug=:slug"
+  status = 200
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/.netlify/functions/post?slug=:slug"
+  status = 200
+
+[[redirects]]
+  from = "/images/:slug"
+  to = "/.netlify/functions/image?slug=:slug"
+  status = 200
+
+[[redirects]]
+  from = "/api/posts"
+  to = "/.netlify/functions/posts-json"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+
+[[redirects]]
+  from = "/rss.xml"
+  to = "/.netlify/functions/rss"
+  status = 200

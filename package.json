@@ -1,0 +1,22 @@
+{
+  "name": "pressurewash-ai-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "netlify dev",
+    "generate:local": "netlify functions:invoke admin-generate --payload '{}'"
+  },
+  "dependencies": {
+    "@fal-ai/client": "latest",
+    "@netlify/blobs": "latest",
+    "@netlify/functions": "latest"
+  },
+  "devDependencies": {
+    "netlify-cli": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

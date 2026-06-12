@@ -33,7 +33,7 @@ export default async function handler(req) {
 
   const siteUrl = getSiteUrl();
   const secret = process.env.ADMIN_GENERATE_SECRET || '';
-  const workerUrl = `${siteUrl}/.netlify/functions/generate-worker?secret=${encodeURIComponent(secret)}&job=${encodeURIComponent(jobId)}&force=true`;
+  const workerUrl = `${siteUrl}/.netlify/functions/generate-worker?secret=${encodeURIComponent(secret)}&job=${encodeURIComponent(jobId)}&force=true&source=manual`;
 
   try {
     await fetch(workerUrl, { method: 'POST' });

@@ -1,0 +1,111 @@
+JUNE 12 REBUILD - WHAT WAS WRONG AND WHAT CHANGED
+==================================================
+
+WHAT WAS ACTUALLY BROKEN
+------------------------
+
+1. IMAGES NEVER WORKED
+   The fal request itself was valid (openai/gpt-image-2 with
+   landscape_16_9 IS a correct combination). The problem is upstream:
+   the FAL key or the fal account (most commonly: no balance / billing
+   not set up - fal returns 403 "Exhausted balance" or 401 for a bad
+   key). The old code swallowed the real reason: the fal client buries
+   it in error.body.detail, and only the generic error.message was
+   saved. So every failure looked identical and was silently replaced
+   with the gradient SVG placeholder.
+
+   >>> FASTEST WAY TO SEE THE REAL REASON NOW:
+   https://YOUR-SITE.netlify.app/.netlify/functions/diagnose?secret=YOUR_ADMIN_SECRET
+   This live-tests the Claude key AND submits a tiny low-quality fal
+   job, then shows you the raw error with a plain-English hint.
+   Check https://fal.ai/dashboard - you very likely need to add a
+   payment method / credits there.
+
+2. THE HOURLY SCHEDULE PRODUCED ALMOST NOTHING
+   Your 4 posts cluster on June 10-11 - those were the manual trigger
+   runs. The Netlify hourly schedule was producing nothing, and there
+   are multiple Netlify support threads from April-May 2026 reporting
+   exactly this: scheduled functions silently stop firing while manual
+   triggers keep working. On top of that, the old scheduled function
+   ignored the worker's HTTP response, so even a failing invocation
+   reported success, and there was no record anywhere of whether the
+   cron fired at all.
+
+WHAT THE REBUILD DOES DIFFERENTLY
+---------------------------------
+
+A. TWO INDEPENDENT HOURLY TRIGGERS
+   - Netlify scheduled function at the top of each hour (kept).
+   - NEW: GitHub Actions cron at 7 minutes past each hour
+     (.github/workflows/hourly-generate.yml). If either scheduler is
+     down, the other keeps publishing. A lock plus the 55-minute
+     minimum gap prevents duplicates.
+
+B. ARTICLE-FIRST PUBLISHING
+   The article is saved and live with a placeholder BEFORE the image
+   is attempted. A crash or timeout during image generation can never
+   lose an article again.
+
+C. IMAGE SELF-HEALING
+   Every hourly run also regenerates one older post that is still on
+   the placeholder. Your 4 existing posts qualify automatically - once
+   fal is healthy, the whole backlog fills in with real GPT Image 2
+   images within a few hours, no manual work.
+
+D. REAL ERRORS, VISIBLE
+   - Image failures now store the full fal error (HTTP status +
+     detail) on the post and in a log.
+   - Every trigger source and every worker run writes a heartbeat.
+   - One dashboard shows it all:
+     /.netlify/functions/health?secret=YOUR_ADMIN_SECRET
+
+E. SMALLER FIXES
+   - Image quality default changed from high to medium (high is the
+     slowest and most expensive tier; override with IMAGE_QUALITY).
+   - Output format default changed from png to jpeg (smaller pages).
+   - One automatic retry on transient fal errors (5xx/429), no retry
+     on key/billing errors.
+   - 8 minute hard timeout on image generation so a hung job cannot
+     eat the background function's 15 minute budget.
+   - Claude call now fails loudly if the article JSON got cut off by
+     max_tokens instead of producing a broken post.
+   - The scheduled trigger now checks and records the worker's HTTP
+     response instead of always reporting success.
+
+HOW TO DEPLOY THIS
+------------------
+
+1. Replace the contents of the GitHub repo with this folder and push
+   (GitHub Desktop: copy files over the old ones, commit, push).
+   Netlify will build and deploy automatically.
+
+2. ONE NEW SETUP STEP - the GitHub backup trigger needs the secret:
+   GitHub repo > Settings > Secrets and variables > Actions >
+   New repository secret
+     Name:  ADMIN_GENERATE_SECRET
+     Value: exactly the same value as in Netlify
+   (Optional: add a repository VARIABLE named SITE_URL if you move to
+   a custom domain. Defaults to the serene-kitsune Netlify URL.)
+
+3. After deploy, open these in order (replace YOUR_ADMIN_SECRET):
+   a) .../.netlify/functions/check-setup?secret=YOUR_ADMIN_SECRET
+      Confirms Netlify can see the keys.
+   b) .../.netlify/functions/diagnose?secret=YOUR_ADMIN_SECRET
+      Live-tests both APIs. If fal shows ok:false, the detail field
+      tells you exactly what to fix (almost certainly billing/balance
+      at fal.ai/dashboard, or re-pasting FAL_KEY).
+   c) .../.netlify/functions/admin-generate?secret=YOUR_ADMIN_SECRET
+      Publishes a post right now to prove the pipeline.
+   d) .../.netlify/functions/health?secret=YOUR_ADMIN_SECRET
+      Bookmark this. Check it tomorrow: you should see ~24 more posts,
+      both triggers with fresh timestamps, and
+      stillOnPlaceholderImage: 0.
+
+COST NOTE
+---------
+24 posts/day roughly: Claude article ~3-4 cents, GPT Image 2 at
+medium quality a few cents per image (low is about 1 cent, high is
+several times more). Ballpark a few dollars per day at this cadence.
+Set IMAGE_QUALITY=low in Netlify env vars to run cheapest, or slow the
+cadence by editing the schedule in netlify.toml and the cron in
+.github/workflows/hourly-generate.yml.

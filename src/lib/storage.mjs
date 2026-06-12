@@ -45,7 +45,11 @@ export async function savePost(post) {
 
 export async function saveImage(slug, imageArrayBuffer, contentType = 'image/png') {
   const store = imagesStore();
-  const extension = contentType.includes('svg') ? 'svg' : (contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png');
+  const extension = contentType.includes('svg')
+    ? 'svg'
+    : contentType.includes('webp')
+      ? 'webp'
+      : (contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png');
   const key = `${slug}.${extension}`;
   await store.set(key, imageArrayBuffer, {
     metadata: {
@@ -61,4 +65,14 @@ export async function getImage(key) {
   if (!key) return null;
   const store = imagesStore();
   return await store.getWithMetadata(key, { type: 'arrayBuffer' });
+}
+
+export async function deleteImage(key) {
+  if (!key) return;
+  const store = imagesStore();
+  try {
+    await store.delete(key);
+  } catch (error) {
+    console.error('Could not delete old image blob', key, error);
+  }
 }

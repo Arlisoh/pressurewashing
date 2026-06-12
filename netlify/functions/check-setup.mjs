@@ -22,7 +22,7 @@ export default async function handler(req) {
       defaultImageModel: process.env.FAL_IMAGE_MODEL || DEFAULT_IMAGE_MODEL,
       environment: diagnostics,
       nextStep: diagnostics.claude.present && diagnostics.fal.present
-        ? 'Run /.netlify/functions/admin-generate?secret=YOUR_ADMIN_SECRET'
+        ? 'Both keys are present. Run /.netlify/functions/diagnose?secret=YOUR_ADMIN_SECRET to live-test them, then /.netlify/functions/admin-generate?secret=YOUR_ADMIN_SECRET to publish a post. Monitor everything at /.netlify/functions/health?secret=YOUR_ADMIN_SECRET'
         : 'Add missing Netlify environment variables with Functions scope, then Trigger deploy.'
     });
   } catch (error) {

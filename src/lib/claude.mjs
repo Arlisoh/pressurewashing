@@ -129,6 +129,9 @@ Requirements:
   }
 
   const data = await response.json();
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('Claude hit the max_tokens limit before finishing the article JSON. Raise CLAUDE_MAX_TOKENS in Netlify environment variables (try 7000).');
+  }
   const text = data.content?.filter((block) => block.type === 'text').map((block) => block.text).join('\n') || '';
   const raw = extractJson(text);
   return normalizeArticle(raw, target);
